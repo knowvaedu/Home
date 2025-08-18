@@ -1,0 +1,330 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>পরীক্ষা প্রস্তুতি</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Apply Noto Serif Bengali font */
+        body, h1, h2, h3, h4, p, a {
+            font-family: 'Noto Serif Bengali', serif;
+            color: white;
+        }
+
+        /* Dark Mode Colorful Backgrounds */
+        .hero-bg {
+            background: linear-gradient(135deg, #2d3436, #636e72, #1e272e);
+            animation: gradientShift 15s ease infinite;
+        }
+        .section-bg-even {
+            background: linear-gradient(to right, #353b48, #2f3640);
+        }
+        .section-bg-odd {
+            background: linear-gradient(to right, #2c2c54, #474787);
+        }
+        .footer-bg {
+            background: linear-gradient(to right, #1e272e, #353b48);
+        }
+
+        /* Gradient Animation */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .hero-bg, .section-bg-even, .section-bg-odd, .footer-bg {
+            background-size: 200% 200%;
+        }
+
+        /* Colorful HR Line */
+        .colorful-hr {
+            border: 0;
+            height: 4px;
+            background: linear-gradient(to right, #ff4757, #f1c40f, #1dd1a1);
+            margin: 1rem auto;
+            width: 50%;
+            border-radius: 2px;
+        }
+
+        /* Card Hover Effect */
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: #1a1a1a;
+            color: white;
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Button Animation */
+        .btn-anim {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: linear-gradient(45deg, #f1c40f, #f39c12);
+            color: black;
+            font-weight: bold;
+        }
+        .btn-anim:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+        .btn-anim::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.5s ease;
+        }
+        .btn-anim:hover::after {
+            transform: translate(-50%, -50%) scale(1);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 font-sans">
+    <!-- Section 1: Hero -->
+    <section class="hero-bg text-white py-20 text-center">
+        <div class="container mx-auto px-4">
+            <h3 class="text-2xl md:text-3xl font-bold mb-6 animate__animated animate__fadeIn">
+                ১০০+ ফ্রি পরীক্ষা দিয়ে নিজের এডমিশন ও চাকরি পরীক্ষার প্রস্তুতি যাচাই করুন।<br>সাথে আছে ভিডিও টিউটোরিয়াল।
+            </h3>
+            <hr class="colorful-hr">
+            <div class="flex justify-center space-x-4">
+                <a href="#" class="btn-anim px-6 py-3 rounded-md">ভিডিয়ো দেখুন</a>
+                <a href="#" class="btn-anim px-6 py-3 rounded-md">পরীক্ষা দিন</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: বিষয়ভিত্তিক পরীক্ষা -->
+    <section class="section-bg-even py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-4 animate__animated animate__fadeInUp">বিষয়ভিত্তিক পরীক্ষা</h2>
+            <hr class="colorful-hr">
+            <p class="text-center mb-12 animate__animated animate__fadeInUp animate__delay-1s">
+                পরীক্ষায় অংশ নেওয়ার আগে সিলেবাস দেখে নিবেন। সিলেবাসের আলোকে প্রস্তুতি নিন, তারপর পরীক্ষায় অংশ নিন। এতে আপনার প্রস্তুতি বেগবান হবে।
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Row 1 -->
+                <div class="card-hover p-6 rounded-lg shadow-md animate__animated animate__fadeInLeft">
+                    <h3 class="text-xl font-semibold mb-4">বাংলা</h3>
+                    <p class="mb-4">বিশ্ববিদ্যালয় ভর্তি, বিসিএস, প্রাথমিক শিক্ষক নিয়োগ, NTRCA পরীক্ষার বাংলার প্রস্তুতি যাচাই করতে বিষয়ভিত্তিক পরীক্ষাগুলোতে অংশগ্রহণ করুন।</p>
+                    <a href="#" class="btn-anim px-4 py-2 rounded-md">সব পরীক্ষা দেখুন</a>
+                </div>
+                <div class="card-hover p-6 rounded-lg shadow-md animate__animated animate__fadeInLeft animate__delay-1s">
+                    <h3 class="text-xl font-semibold mb-4">ইংরেজি</h3>
+                    <p class="mb-4">বিশ্ববিদ্যালয় ভর্তি, বিসিএস, প্রাথমিক শিক্ষক নিয়োগ, NTRCA পরীক্ষার ইংরেজি প্রস্তুতি যাচাই করতে বিষয়ভিত্তিক পরীক্ষাগুলোতে অংশগ্রহণ করুন।</p>
+                    <a href="https://knowvaedu.github.io/englishtest/" class="btn-anim px-4 py-2 rounded-md">সব পরীক্ষা দেখুন</a>
+                </div>
+                <div class="card-hover p-6 rounded-lg shadow-md animate__animated animate__fadeInLeft animate__delay-2s">
+                    <h3 class="text-xl font-semibold mb-4">গণিত</h3>
+                    <p class="mb-4">বিসিএস, প্রাথমিক শিক্ষক নিয়োগ, NTRCA পরীক্ষার গণিত প্রস্তুতি যাচাই করতে বিষয়ভিত্তিক পরীক্ষাগুলোতে অংশগ্রহণ করুন।</p>
+                    <a href="#" class="btn-anim px-4 py-2 rounded-md">সব পরীক্ষা দেখুন</a>
+                </div>
+                <div class="card-hover p-6 rounded-lg shadow-md animate__animated animate__fadeInLeft animate__delay-3s">
+                    <h3 class="text-xl font-semibold mb-4">তথ্য প্রযুক্তি</h3>
+                    <p class="mb-4">বিসিএস, প্রাথমিক শিক্ষক নিয়োগ, NTRCA পরীক্ষার তথ্য প্রযুক্তির প্রস্তুতি যাচাই করতে বিষয়ভিত্তিক পরীক্ষাগুলোতে অংশগ্রহণ করুন।</p>
+                    <a href="#" class="btn-anim px-4 py-2 rounded-md">সব পরীক্ষা দেখুন</a>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Row 2 -->
+                <div class="card-hover p-6 rounded-lg shadow-md animate__animated animate__fadeInRight">
+                    <h3 class="text-xl font-semibold mb-4">বাংলাদেশ বিষয়াবলি</h3>
+                    <p class="mb-4">বিশ্ববিদ্যালয় ভর্তি, বিসিএস, প্রাথমিক শিক্ষক নিয়োগ, NTRCA পরীক্ষার সাধারণ জ্ঞান (বাংলাদেশ বিষয়াবলি) প্রস্তুতি যাচাই করতে বিষয়ভিত্তিক পরীক্ষাগুলোতে অংশগ্রহণ করুন।</p>
+                    <a href="#" class="btn-anim px-4 py-2 rounded-md">সব পরীক্ষা দেখুন</a>
+                </div>
+                <div class="card-hover p-6 rounded-lg shadow-md animate__animated animate__fadeInRight animate__delay-1s">
+                    <h3 class="text-xl font-semibold mb-4">আন্তর্জাতিক বিষয়াবলি</h3>
+                    <p class="mb-4">বিশ্ববিদ্যালয় ভর্তি, বিসিএস, প্রাথমিক শিক্ষক নিয়োগ, NTRCA পরীক্ষার সাধারণ জ্ঞান (আন্তর্জাতিক বিষয়াবলি) প্রস্তুতি যাচাই করতে বিষয়ভিত্তিক পরীক্ষাগুলোতে অংশগ্রহণ করুন।</p>
+                    <a href="#" class="btn-anim px-4 py-2 rounded-md">সব পরীক্ষা দেখুন</a>
+                </div>
+                <div class="card-hover p-6 rounded-lg shadow-md animate__animated animate__fadeInRight animate__delay-2s">
+                    <h3 class="text-xl font-semibold mb-4">মানসিক দক্ষতা</h3>
+                    <p class="mb-4">বিশ্ববিদ্যালয় ভর্তি, বিসিএস, প্রাথমিক শিক্ষক নিয়োগ, NTRCA পরীক্ষার মানসিক দক্ষতা(IQ) প্রস্তুতি যাচাই করতে বিষয়ভিত্তিক পরীক্ষাগুলোতে অংশগ্রহণ করুন।</p>
+                    <a href="#" class="btn-anim px-4 py-2 rounded-md">সব পরীক্ষা দেখুন</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: ভিডিয়ো টিউটোরিয়াল -->
+    <section class="section-bg-odd py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-4 animate__animated animate__fadeInUp">ভিডিয়ো টিউটোরিয়াল দেখুন</h2>
+            <hr class="colorful-hr">
+            <p class="text-center mb-12 animate__animated animate__fadeInUp animate__delay-1s">
+                বিষয়ভিত্তিক ভিডিয়ো টিউটোরিয়াল দেখে প্রস্তুতি নিন আপনার কাঙ্খিত পরীক্ষার। সবগুলো বিষয়ে সমপরিমাণ টিউটোরিয়াল এখনো আপলোড করা হয়নি। আমাদের কাজ চলছে...
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Row 1 -->
+                <div class="card-hover p-6 rounded-lg shadow-md animate__animated animate__fadeInLeft">
+                    <h3 class="text-xl font-semibold mb-4">বাংলা</h3>
+                    <p class="mb-4">বিশ্ববিদ্যালয় ভর্তি, বিসিএস, প্রাথমিক শিক্ষক নিয়োগ, NTRCA পরীক্ষার বাংলার প্রস্তুতি নিতে বিভিন্ন টপিকের ভিডিয়ো টিউটোরিয়ালগুলো দেখে নিন।</p>
+                    <a href="#" class="btn-anim px-4 py-2 rounded-md">ভিডিয়ো দেখুন</a>
+                </div>
+                <div class="card-hover p-6 rounded-lg shadow-md animate__animated animate__fadeInLeft animate__delay-1s">
+                    <h3 class="text-xl font-semibold mb-4">ইংরেজি</h3>
+                    <p class="mb-4">বিশ্ববিদ্যালয় ভর্তি, বিসিএস, প্রাথমিক শিক্ষক নিয়োগ, NTRCA পরীক্ষার ইংরেজি প্রস্তুতি নিতে বিভিন্ন টপিকের ভিডিয়ো টিউটোরিয়ালগুলো দেখে নিন।</p>
+                    <a href="#" class="btn-anim px-4 py-2 rounded-md">ভিডিয়ো দেখুন</a>
+                </div>
+                <div class="card-hover p-6 rounded-lg shadow-md animate__animated animate__fadeInLeft animate__delay-2s">
+                    <h3 class="text-xl font-semibold mb-4">গণিত</h3>
+                    <p class="mb-4">বিসিএস, প্রাথমিক শিক্ষক নিয়োগ, NTRCA পরীক্ষার গণিত প্রস্তুতি নিতে বিভিন্ন টপিকের ভিডিয়ো টিউটোরিয়ালগুলো দেখে নিন।</p>
+                    <a href="#" class="btn-anim px-4 py-2 rounded-md">ভিডিয়ো দেখুন</a>
+                </div>
+                <div class="card-hover p-6 rounded-lg shadow-md animate__animated animate__fadeInLeft animate__delay-3s">
+                    <h3 class="text-xl font-semibold mb-4">তথ্য প্রযুক্তি</h3>
+                    <p class="mb-4">বিসিএস, প্রাথমিক শিক্ষক নিয়োগ, NTRCA পরীক্ষার তথ্য প্রযুক্তির প্রস্তুতি নিতে বিভিন্ন টপিকের ভিডিয়ো টিউটোরিয়ালগুলো দেখে নিন।</p>
+                    <a href="#" class="btn-anim px-4 py-2 rounded-md">ভিডিয়ো দেখুন</a>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Row 2 -->
+                <div class="card-hover p-6 rounded-lg shadow-md animate__animated animate__fadeInRight">
+                    <h3 class="text-xl font-semibold mb-4">বাংলাদেশ বিষয়াবলি</h3>
+                    <p class="mb-4">বিশ্ববিদ্যালয় ভর্তি, বিসিএস, প্রাথমিক শিক্ষক নিয়োগ, NTRCA পরীক্ষার সাধারণ জ্ঞান (বাংলাদেশ বিষয়াবলি) প্রস্তুতি নিতে বিভিন্ন টপিকের ভিডিয়ো টিউটোরিয়ালগুলো দেখে নিন।</p>
+                    <a href="#" class="btn-anim px-4 py-2 rounded-md">ভিডিয়ো দেখুন</a>
+                </div>
+                <div class="card-hover p-6 rounded-lg shadow-md animate__animated animate__fadeInRight animate__delay-1s">
+                    <h3 class="text-xl font-semibold mb-4">আন্তর্জাতিক বিষয়াবলি</h3>
+                    <p class="mb-4">বিশ্ববিদ্যালয় ভর্তি, বিসিএস, প্রাথমিক শিক্ষক নিয়োগ, NTRCA পরীক্ষার সাধারণ জ্ঞান (আন্তর্জাতিক বিষয়াবলি) প্রস্তুতি নিতে বিভিন্ন টপিকের ভিডিয়ো টিউটোরিয়ালগুলো দেখে নিন।</p>
+                    <a href="#" class="btn-anim px-4 py-2 rounded-md">ভিডিয়ো দেখুন</a>
+                </div>
+                <div class="card-hover p-6 rounded-lg shadow-md animate__animated animate__fadeInRight animate__delay-2s">
+                    <h3 class="text-xl font-semibold mb-4">মানসিক দক্ষতা</h3>
+                    <p class="mb-4">বিশ্ববিদ্যালয় ভর্তি, বিসিএস, প্রাথমিক শিক্ষক নিয়োগ, NTRCA পরীক্ষার মানসিক দক্ষতা(IQ) প্রস্তুতি নিতে বিভিন্ন টপিকের ভিডিয়ো টিউটোরিয়ালগুলো দেখে নিন।</p>
+                    <a href="#" class="btn-anim px-4 py-2 rounded-md">ভিডিয়ো দেখুন</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: প্রয়োজনীয় কম্পিউটার ও IT প্রশিক্ষণ -->
+    <section class="hero-bg text-white py-20 text-center">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-4 animate__animated animate__fadeInUp">প্রয়োজনীয় কম্পিউটার ও IT প্রশিক্ষণ</h2>
+            <hr class="colorful-hr">
+            <p class="mb-6 animate__animated animate__fadeInUp animate__delay-1s">
+                শিক্ষাজীবন হোক বা চাকরিজীবন, কম্পিউটার ও বিভিন্ন প্রয়োজনীয় টুল্স ব্যবহার না জানলে অন্যদের থেকে পিছিয়ে পড়ার সম্ভাবনা থেকে যায়। এই অবস্থা থেকে উত্তরণের জন্য রয়েছে আমাদের ফ্রি কম্পিউটার প্রশিক্ষণ।
+            </p>
+            <p class="mb-6 animate__animated animate__fadeInUp animate__delay-2s">
+                <strong>প্রশিক্ষণের বিষয়বস্তু:</strong><br>
+                ১) Computer Hardware & Software Fundamental<br>
+                ২) MS Word<br>
+                ৩) PowerPoint<br>
+                ৪) MS Excel<br>
+                ৫) Google Workspace<br>
+                ৬) বিভিন্ন AI টুল্স (CG, Gemini, Claude, Cutout Pro, Canva etc)
+            </p>
+            <div class="flex justify-center space-x-4">
+                <a href="#" class="btn-anim px-6 py-3 rounded-md">বিস্তারিত জানুন</a>
+                <a href="#" class="btn-anim px-6 py-3 rounded-md">রেজিস্ট্রেশন করুন</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 5: ভোলান্টিয়ার -->
+    <section class="section-bg-even py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-4 animate__animated animate__fadeInUp">ভোলান্টিয়ার হতে চান?</h2>
+            <hr class="colorful-hr">
+            <p class="text-center mb-12 animate__animated animate__fadeInUp animate__delay-1s">
+                আমরা এই ওয়েবসাইটের মাধ্যমে চেষ্টা করছি বিনামূল্যে চাকরি প্রত্যাশী বা বিশ্ববিদ্যালয়ে ভর্তি প্রত্যাশীদের সাহায্য করতে। এত বড় কর্মযজ্ঞ সম্পাদনে এডমিনের উপর অনেক চাপ যাচ্ছে। তাই আমরা কিছু স্বেচ্ছাসেবী খুঁজছি। স্বেচ্ছাসেবীতা সম্পর্কে বিস্তারিত জানতে বা স্বেচ্ছাসেবী হিসেবে যোগদান করতে নিচের বাটনগুলো ক্লিক করুন।
+            </p>
+            <div class="flex justify-center space-x-4">
+                <a href="#" class="btn-anim px-6 py-3 rounded-md">বিস্তারিত জানুন</a>
+                <a href="#" class="btn-anim px-6 py-3 rounded-md">যোগ দিন</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 6: ডোনার -->
+    <section class="section-bg-odd py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-4 animate__animated animate__fadeInUp">ডোনার হবেন নাকি?</h2>
+            <hr class="colorful-hr">
+            <p class="text-center mb-12 animate__animated animate__fadeInUp animate__delay-1s">
+                আমাদের এই কর্মযজ্ঞে সময় দিয়ে ভোলান্টিয়ার হিসেবে যুক্ত হতে না পারলেও চাইলে অর্থ সহায়তা করে যোগ দিতে পারেন। আপনার ডোনেশনের কার্যকর ব্যবহারের দায়িত্ব আমরা নিব।
+            </p>
+            <div class="flex justify-center space-x-4">
+                <a href="#" class="btn-anim px-6 py-3 rounded-md">আরো জানুন</a>
+                <a href="#" class="btn-anim px-6 py-3 rounded-md">ডোনেট করুন</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 7: Footer -->
+    <footer class="footer-bg text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0 animate__animated animate__fadeInLeft">
+                    <h3 class="text-xl font-bold">লোগো</h3>
+                    <p class="mt-2">স্বপ্ন আপনার, বাস্তবায়নের অংশীদার আমরাও</p>
+                </div>
+                <div class="mb-6 md:mb-0 animate__animated animate__fadeInUp">
+                    <h4 class="text-lg font-semibold">যোগাযোগ</h4>
+                    <p>ঠিকানা: ঢাকা, বাংলাদেশ</p>
+                    <p>ইমেইল: example@email.com</p>
+                    <p>ফোন: +৮৮০ ১২৩৪ ৫৬৭৮৯০</p>
+                </div>
+                <div class="animate__animated animate__fadeInRight">
+                    <h4 class="text-lg font-semibold">ফলো করুন</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-white hover:text-yellow-400">ফেসবুক</a>
+                        <a href="#" class="text-white hover:text-yellow-400">ইউটিউব</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
