@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
@@ -45,7 +6,7 @@
     <title>KnowvaEdu</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;700&family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* Apply Noto Serif Bengali font */
         body, h1, h2, h3, h4, p, a {
@@ -53,10 +14,38 @@
             color: white;
         }
 
+        :root {
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --main-text-color: #ffffff;
+            --secondary-text-color: #b0b0b0;
+            --primary-highlight: #ffc107; /* Yellow color */
+            --shadow-subtle: 0 4px 15px rgba(0, 0, 0, 0.2);
+            --border-radius-card: 12px;
+            --border-radius-button: 8px;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--main-text-color);
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1400px;
+        }
+
         /* Dark Mode Colorful Backgrounds */
         .hero-bg {
             background: linear-gradient(135deg, #2d3436, #636e72, #1e272e);
             animation: gradientShift 15s ease infinite;
+            padding-top: 100px;
+            padding-bottom: 100px;
         }
         .section-bg-even {
             background: linear-gradient(to right, #353b48, #2f3640);
@@ -76,16 +65,6 @@
         }
         .hero-bg, .section-bg-even, .section-bg-odd, .footer-bg {
             background-size: 200% 200%;
-        }
-
-        /* Colorful HR Line */
-        .colorful-hr {
-            border: 0;
-            height: 4px;
-            background: linear-gradient(to right, #ff4757, #f1c40f, #1dd1a1);
-            margin: 1rem auto;
-            width: 50%;
-            border-radius: 2px;
         }
 
         /* Card Hover Effect */
@@ -127,33 +106,174 @@
         .btn-anim:hover::after {
             transform: translate(-50%, -50%) scale(1);
         }
+
+        /* New Ebook Section Styling */
+        .hero-section {
+            background-color: var(--container-bg);
+            border-radius: var(--border-radius-card);
+            box-shadow: var(--shadow-subtle);
+            padding: 4rem 2rem;
+            margin: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-highlight);
+            margin-bottom: 1rem;
+            animation: fadeInDown 1s ease-in-out;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: var(--secondary-text-color);
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease-in-out;
+        }
+
+        .hero-cta {
+            background-color: var(--primary-highlight);
+            color: #121212;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius-button);
+            text-decoration: none;
+            font-weight: 700;
+            transition: background-color 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        .hero-cta:hover {
+            background-color: #d1a30c;
+        }
+
+        .books-section {
+            background-color: var(--container-bg);
+            border-radius: var(--border-radius-card);
+            box-shadow: var(--shadow-subtle);
+            padding: 2rem;
+            margin: 2rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .books-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            justify-items: center;
+            padding: 1rem;
+        }
+
+        .book-card {
+            background-color: #2a2a2a;
+            border-radius: var(--border-radius-card);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            text-align: center;
+            width: 100%;
+            max-width: 250px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .book-cover-small {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            border-radius: 8px;
+            object-fit: cover;
+            margin: 0 auto 1rem;
+        }
+
+        .book-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary-highlight);
+            margin-bottom: 0.5rem;
+        }
+
+        .book-author {
+            font-size: 0.9rem;
+            color: var(--secondary-text-color);
+            margin-bottom: 1rem;
+        }
+
+        .btn-container {
+            margin-top: auto;
+        }
+
+        .download-btn {
+            background-color: var(--primary-highlight);
+            color: #1e1e1e;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius-button);
+            text-decoration: none;
+            font-weight: 700;
+            transition: background-color 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background-color: #d1a30c;
+        }
+
+        @media (max-width: 768px) {
+            .books-container {
+                grid-template-columns: 1fr;
+            }
+            .hero-title {
+                font-size: 2rem;
+            }
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-900 font-sans">
-    <!-- Section 1: Hero -->
     <section class="hero-bg text-white py-20 text-center">
         <div class="container mx-auto px-4">
             <h3 class="text-2xl md:text-3xl font-bold mb-6 animate__animated animate__fadeIn">
-                ১০০+ ফ্রি পরীক্ষা দিয়ে নিজের এডমিশন ও চাকরি পরীক্ষার প্রস্তুতি যাচাই করুন।<br>সাথে আছে ভিডিও টিউটোরিয়াল।
+                ৩০০০ + প্রশ্ন সম্বলিত ৪৬+ ফ্রি পরীক্ষা দিয়ে নিজের এডমিশন ও চাকরি পরীক্ষার প্রস্তুতি যাচাই করুন।<br>সাথে আছে ভিডিও টিউটোরিয়াল।
             </h3>
-            <hr class="colorful-hr">
             <div class="flex justify-center space-x-4">
-                <a href="#" class="btn-anim px-6 py-3 rounded-md">ভিডিয়ো দেখুন</a>
-                <a href="#" class="btn-anim px-6 py-3 rounded-md">পরীক্ষা দিন</a>
+                <a href="https://www.youtube.com/@KnowvaEdu" class="btn-anim px-6 py-3 rounded-md">ভিডিয়ো দেখুন</a>
+                <a href="#examid" class="btn-anim px-6 py-3 rounded-md">পরীক্ষা দিন</a>
             </div>
         </div>
     </section>
 
-    <!-- Section 2: বিষয়ভিত্তিক পরীক্ষা -->
-    <section class="section-bg-even py-16">
+    <section id="hero" class="hero-section">
+        <h1 class="hero-title animate__animated animate__fadeInDown">আপনার শিক্ষাকে এক ধাপ এগিয়ে নিয়ে যান।</h1>
+        <p class="hero-subtitle animate__animated animate__fadeInUp">চাকরির প্রস্তুত্তির জন্য NCTB ও প্রয়োজনীয় কিছু বই সংগ্রহে রাখুন। ডাউনলোড বাটন থেকে বইগুলো ডাউনলোড করে রাখুন </p>
+        <a href="#section-01" class="hero-cta animate__animated animate__pulse">ই-বুকস দেখুন</a>
+    </section>
+
+    <section id="section-01" class="books-section">
+        <h2 class="text-4xl font-bold text-center mb-10 text-yellow-400 animate__animated animate__fadeInUp">ই-বুকস</h2>
+        <div class="books-container"></div>
+    </section>
+
+    <section class="section-bg-even py-16" id="examid">
         <div class="container mx-auto px-4">
             <h2 class="text-3xl font-bold text-center mb-4 animate__animated animate__fadeInUp">বিষয়ভিত্তিক পরীক্ষা</h2>
-            <hr class="colorful-hr">
             <p class="text-center mb-12 animate__animated animate__fadeInUp animate__delay-1s">
                 পরীক্ষায় অংশ নেওয়ার আগে সিলেবাস দেখে নিবেন। সিলেবাসের আলোকে প্রস্তুতি নিন, তারপর পরীক্ষায় অংশ নিন। এতে আপনার প্রস্তুতি বেগবান হবে।
             </p>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <!-- Row 1 -->
                 <div class="card-hover p-6 rounded-lg shadow-md animate__animated animate__fadeInLeft">
                     <h3 class="text-xl font-semibold mb-4">বাংলা</h3>
                     <p class="mb-4">বিশ্ববিদ্যালয় ভর্তি, বিসিএস, প্রাথমিক শিক্ষক নিয়োগ, NTRCA পরীক্ষার বাংলার প্রস্তুতি যাচাই করতে বিষয়ভিত্তিক পরীক্ষাগুলোতে অংশগ্রহণ করুন।</p>
@@ -176,7 +296,6 @@
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Row 2 -->
                 <div class="card-hover p-6 rounded-lg shadow-md animate__animated animate__fadeInRight">
                     <h3 class="text-xl font-semibold mb-4">বাংলাদেশ বিষয়াবলি</h3>
                     <p class="mb-4">বিশ্ববিদ্যালয় ভর্তি, বিসিএস, প্রাথমিক শিক্ষক নিয়োগ, NTRCA পরীক্ষার সাধারণ জ্ঞান (বাংলাদেশ বিষয়াবলি) প্রস্তুতি যাচাই করতে বিষয়ভিত্তিক পরীক্ষাগুলোতে অংশগ্রহণ করুন।</p>
@@ -196,16 +315,13 @@
         </div>
     </section>
 
-    <!-- Section 3: ভিডিয়ো টিউটোরিয়াল -->
     <section class="section-bg-odd py-16">
         <div class="container mx-auto px-4">
             <h2 class="text-3xl font-bold text-center mb-4 animate__animated animate__fadeInUp">ভিডিয়ো টিউটোরিয়াল দেখুন</h2>
-            <hr class="colorful-hr">
             <p class="text-center mb-12 animate__animated animate__fadeInUp animate__delay-1s">
                 বিষয়ভিত্তিক ভিডিয়ো টিউটোরিয়াল দেখে প্রস্তুতি নিন আপনার কাঙ্খিত পরীক্ষার। সবগুলো বিষয়ে সমপরিমাণ টিউটোরিয়াল এখনো আপলোড করা হয়নি। আমাদের কাজ চলছে...
             </p>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <!-- Row 1 -->
                 <div class="card-hover p-6 rounded-lg shadow-md animate__animated animate__fadeInLeft">
                     <h3 class="text-xl font-semibold mb-4">বাংলা</h3>
                     <p class="mb-4">বিশ্ববিদ্যালয় ভর্তি, বিসিএস, প্রাথমিক শিক্ষক নিয়োগ, NTRCA পরীক্ষার বাংলার প্রস্তুতি নিতে বিভিন্ন টপিকের ভিডিয়ো টিউটোরিয়ালগুলো দেখে নিন।</p>
@@ -228,7 +344,6 @@
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Row 2 -->
                 <div class="card-hover p-6 rounded-lg shadow-md animate__animated animate__fadeInRight">
                     <h3 class="text-xl font-semibold mb-4">বাংলাদেশ বিষয়াবলি</h3>
                     <p class="mb-4">বিশ্ববিদ্যালয় ভর্তি, বিসিএস, প্রাথমিক শিক্ষক নিয়োগ, NTRCA পরীক্ষার সাধারণ জ্ঞান (বাংলাদেশ বিষয়াবলি) প্রস্তুতি নিতে বিভিন্ন টপিকের ভিডিয়ো টিউটোরিয়ালগুলো দেখে নিন।</p>
@@ -248,61 +363,48 @@
         </div>
     </section>
 
-    <!-- Section 4: প্রয়োজনীয় কম্পিউটার ও IT প্রশিক্ষণ -->
+    <section class="section-bg-odd py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-4 animate__animated animate__fadeInUp">জব সার্কুলার</h2>
+            <p class="text-center mb-12 animate__animated animate__fadeInUp animate__delay-1s">
+                সরকারি বেসরকারি বিভিন্ন চাকরির খবর পেতে আমাদের ওয়েবসাইটে নিয়মিত আপডেটেড থাকুন। এখান থেকে আপনারা অথেনটিক চাকরির খবরগুলো পেয়ে যাবেন।
+            </p>
+            <div class="flex justify-center space-x-4">
+                <a href="https://www.knowvaedu.info/category/circular/" class="btn-anim px-6 py-3 rounded-md">জব সার্কুলার দেখুন</a>
+            </div>
+        </div>
+    </section>
+
     <section class="hero-bg text-white py-20 text-center">
         <div class="container mx-auto px-4">
             <h2 class="text-3xl font-bold mb-4 animate__animated animate__fadeInUp">প্রয়োজনীয় কম্পিউটার ও IT প্রশিক্ষণ</h2>
-            <hr class="colorful-hr">
-            <p class="mb-6 animate__animated animate__fadeInUp animate__delay-1s">
-                শিক্ষাজীবন হোক বা চাকরিজীবন, কম্পিউটার ও বিভিন্ন প্রয়োজনীয় টুল্স ব্যবহার না জানলে অন্যদের থেকে পিছিয়ে পড়ার সম্ভাবনা থেকে যায়। এই অবস্থা থেকে উত্তরণের জন্য রয়েছে আমাদের ফ্রি কম্পিউটার প্রশিক্ষণ।
+            <p class="mb-6 animate__animated animate__fadeInUp animate__delay-1s" id="pid">
+                শিক্ষাজীবন হোক বা চাকরিজীবন, কম্পিউটার ও বিভিন্ন প্রয়োজনীয় টুল্স ব্যবহার না জানলে অন্যদের থেকে পিছিয়ে পড়ার সম্ভাবনা থেকে যায়। এই অবস্থা থেকে উত্তরণের জন্য রয়েছে মাত্র ৫০০ টাকায় কম্পিউটার প্রশিক্ষণ কোর্স
             </p>
             <p class="mb-6 animate__animated animate__fadeInUp animate__delay-2s">
                 <strong>প্রশিক্ষণের বিষয়বস্তু:</strong><br>
-                ১) Computer Hardware & Software Fundamental<br>
-                ২) MS Word<br>
-                ৩) PowerPoint<br>
-                ৪) MS Excel<br>
-                ৫) Google Workspace<br>
-                ৬) বিভিন্ন AI টুল্স (CG, Gemini, Claude, Cutout Pro, Canva etc)
+                Computer Hardware & Software Fundamental
+                MS Word | PowerPoint | MS Excel | Google Workspace |
+                Essential AI Tools
             </p>
             <div class="flex justify-center space-x-4">
-                <a href="#" class="btn-anim px-6 py-3 rounded-md">বিস্তারিত জানুন</a>
-                <a href="#" class="btn-anim px-6 py-3 rounded-md">রেজিস্ট্রেশন করুন</a>
+                <a href="https://www.knowvaedu.info/basiccomputercourse" class="btn-anim px-6 py-3 rounded-md">বিস্তারিত জানুন</a>
             </div>
         </div>
     </section>
 
-    <!-- Section 5: ভোলান্টিয়ার -->
     <section class="section-bg-even py-16">
         <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center mb-4 animate__animated animate__fadeInUp">ভোলান্টিয়ার হতে চান?</h2>
-            <hr class="colorful-hr">
+            <h2 class="text-3xl font-bold text-center mb-4 animate__animated animate__fadeInUp">আমাদের টিমে যোগ দিতে চান? </h2>
             <p class="text-center mb-12 animate__animated animate__fadeInUp animate__delay-1s">
-                আমরা এই ওয়েবসাইটের মাধ্যমে চেষ্টা করছি বিনামূল্যে চাকরি প্রত্যাশী বা বিশ্ববিদ্যালয়ে ভর্তি প্রত্যাশীদের সাহায্য করতে। এত বড় কর্মযজ্ঞ সম্পাদনে এডমিনের উপর অনেক চাপ যাচ্ছে। তাই আমরা কিছু স্বেচ্ছাসেবী খুঁজছি। স্বেচ্ছাসেবীতা সম্পর্কে বিস্তারিত জানতে বা স্বেচ্ছাসেবী হিসেবে যোগদান করতে নিচের বাটনগুলো ক্লিক করুন।
+                আমরা এই ওয়েবসাইটের মাধ্যমে চেষ্টা করছি বিনামল্যে চাকরি প্রত্যাশী বা আমরা এই ওয়েবসাইটের মাধ্যমে চেষ্টা করছি বিনামল্যে ও স্বল্পমূল্যে চাকরি প্রত্যাশী বা বিশ্ববিদ্যালয়ে ভর্তি প্রত্যাশীদের সাহায্য করতে। এত বড় কর্মযজ্ঞ সম্পাদনে এডমিনের উপর অনেক চাপ যাচ্ছে। তাই আমরা শর্তসাপেক্ষ কিছু কর্মী খুঁজছি। এই বিষয় সম্পর্কে বিস্তারিত জানতে বা টিম মেম্বার হিসেবে যোগদান করতে আমাদের ফেসবুক পেইজে ম্যাসেজ দিন। যোগাযোগ করুন।
             </p>
             <div class="flex justify-center space-x-4">
-                <a href="#" class="btn-anim px-6 py-3 rounded-md">বিস্তারিত জানুন</a>
-                <a href="#" class="btn-anim px-6 py-3 rounded-md">যোগ দিন</a>
+                <a href="https://www.facebook.com/KnowvaEdu/" class="btn-anim px-6 py-3 rounded-md">যোগাযোগ করুন</a>
             </div>
         </div>
     </section>
 
-    <!-- Section 6: ডোনার -->
-    <section class="section-bg-odd py-16">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center mb-4 animate__animated animate__fadeInUp">ডোনার হবেন নাকি?</h2>
-            <hr class="colorful-hr">
-            <p class="text-center mb-12 animate__animated animate__fadeInUp animate__delay-1s">
-                আমাদের এই কর্মযজ্ঞে সময় দিয়ে ভোলান্টিয়ার হিসেবে যুক্ত হতে না পারলেও চাইলে অর্থ সহায়তা করে যোগ দিতে পারেন। আপনার ডোনেশনের কার্যকর ব্যবহারের দায়িত্ব আমরা নিব।
-            </p>
-            <div class="flex justify-center space-x-4">
-                <a href="#" class="btn-anim px-6 py-3 rounded-md">আরো জানুন</a>
-                <a href="#" class="btn-anim px-6 py-3 rounded-md">ডোনেট করুন</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Section 7: Footer -->
     <footer class="footer-bg text-white py-12">
         <div class="container mx-auto px-4">
             <div class="flex flex-col md:flex-row justify-between items-center">
@@ -326,5 +428,80 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const bookshelf = document.querySelector('.books-container');
+                if (!bookshelf) {
+                    console.error('Bookshelf container not found!');
+                    return;
+                }
+
+                const books = [
+                    {
+                        title: 'SSC Bangla Grammar',
+                        cover: 'https://www.knowvaedu.info/wp-content/uploads/2025/09/b2.png',
+                        author: 'NCTB',
+                        download: 'https://www.knowvaedu.info/wp-content/uploads/2025/09/ব্যাকরণ-nctbbook.com_.pdf'
+                    },
+                    {
+                        title: 'Lal-Nil Dipaboli',
+                        cover: 'https://www.knowvaedu.info/wp-content/uploads/2025/09/55153750.jpg',
+                        author: 'Humayun Azad',
+                        download: 'https://www.knowvaedu.info/wp-content/uploads/2025/09/লাল-নীল-দীপাবলী-বা-বাংলা-সাহিত্যের-জীবনী-।।-হুমায়ুন-আজাদ_copy.pdf'
+                    },
+                    {
+                        title: 'SSC Science',
+                        cover: 'https://www.knowvaedu.info/wp-content/uploads/2025/09/General-Science-Class-10.jpg',
+                        author: 'NCTB',
+                        download: 'https://www.knowvaedu.info/wp-content/uploads/2025/09/বিজ্ঞান-nctbbook.com_.pdf'
+                    },
+                    {
+                        title: 'SSC Geography',
+                        cover: 'https://www.knowvaedu.info/wp-content/uploads/2025/09/geo.jpg',
+                        author: 'NCTB',
+                        download: 'https://www.knowvaedu.info/wp-content/uploads/2025/09/ভূগোল-nctbbook.com_.pdf'
+                    },
+                    {
+                        title: 'SSC BGS',
+                        cover: 'https://www.knowvaedu.info/wp-content/uploads/2025/09/bgs.png',
+                        author: 'NCTB',
+                        download: 'https://www.knowvaedu.info/wp-content/uploads/2025/09/bgs-nctbbook.com_.pdf'
+                    },
+                    {
+                        title: 'Cliff\'s TOEFL',
+                        cover: 'https://www.knowvaedu.info/wp-content/uploads/2025/09/toefl.jpg',
+                        author: 'Jerry Bobrow(Editor)',
+                        download: 'https://www.knowvaedu.info/wp-content/uploads/2025/09/Cliff_s-Toefl.pdf'
+                    },
+                    {
+                        title: 'SSC History',
+                        cover: 'https://www.knowvaedu.info/wp-content/uploads/2025/09/history.png',
+                        author: 'NCTB',
+                        download: 'https://www.knowvaedu.info/wp-content/uploads/2025/09/hbwc-nctbbook.com_.pdf'
+                    }
+                ];
+
+                books.forEach(book => {
+                    const bookDiv = document.createElement('div');
+                    bookDiv.className = 'book-card';
+                    bookDiv.innerHTML = `
+                        <img src="${book.cover}" alt="${book.title} Cover" class="book-cover-small">
+                        <p class="book-title">${book.title}</p>
+                        <p class="book-author">${book.author}</p>
+                        <div class="btn-container">
+                            <a href="${book.download}" class="download-btn" download>ডাউনলোড</a>
+                        </div>
+                    `;
+                    bookshelf.appendChild(bookDiv);
+                });
+
+                console.log('Books section populated successfully.');
+            } catch (error) {
+                console.error('Error populating books section:', error);
+            }
+        });
+    </script>
 </body>
 </html>
